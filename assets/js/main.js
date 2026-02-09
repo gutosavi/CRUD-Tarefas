@@ -141,7 +141,7 @@ function atualizarContadores() {
 function atualizaPágina() {
   setTimeout(() => {
     window.location.reload();
-  }, 1500);
+  }, 5000);
 }
 
 // Filtros e listeners
