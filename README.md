@@ -68,9 +68,11 @@ crudtarefas
 
 ---
 
-## 📸 Preview
+## Preview
 
-> _(adicione aqui um print ou gif do projeto em funcionamento)_
+<p align="center">
+  <img src="assets/img/gifProjeto.gif" alt="Preview do CRUD de Tarefas" width="800">
+</p>
 
 ---
 
