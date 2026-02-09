@@ -57,6 +57,15 @@ button:hover {
   background: #0b7dda;
 }
 
+#btn-cancelar {
+  background-color: #4caf50;
+  display: none;
+}
+
+#btn-cancelar:hover {
+  background-color: #35c93c;
+}
+
 .btn-remover {
   background-color: #4caf50;
 }

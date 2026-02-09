@@ -2,6 +2,18 @@ let tarefas = [];
 let modoOnline = true;
 let tarefaEmEdicao = null;
 
+// Simulação simples de API
+function simularAPISimples() {
+  console.log("Simulando envio para servidor...");
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      alert("Servidor offline no momento - tarefa pendente de sincronização!");
+      resolve({ success: true });
+    }, 1000);
+  });
+}
+
 // Funções localStorage
 function salvarTarefas() {
   localStorage.setItem("tarefas-app", JSON.stringify(tarefas));
@@ -75,6 +87,14 @@ function renderizarTarefas() {
   atualizarContadores();
   form.reset();
 
+  simularAPISimples()
+    .then(() => {
+      console.log("Tarefa em espera de sincronização!");
+    })
+    .catch(() => {
+      console.log("Falha na sincronização");
+    });
+
   return valid;
 }
 
@@ -101,9 +121,19 @@ function mostrarTarefas(listaTarefas) {
 
 function atualizarContadores() {
   const totalTarefas = tarefas.length;
+  const tarefasNaoSincronizadas = tarefas.filter((t) => !t.sincronizado.length);
 
   document.getElementById("contador-tarefas").textContent =
     `${totalTarefas} tarefa(s)`;
+  document.getElementById("contador-pendentes").textContent =
+    `${tarefasNaoSincronizadas.length} tarefa(s) não sincronizada(s)`;
+}
+
+// Função para dar um refresh na página
+function atualizaPágina() {
+  setTimeout(() => {
+    window.location.reload();
+  }, 1500);
 }
 
 // Filtros e listeners
@@ -150,6 +180,24 @@ document.addEventListener("click", (event) => {
   document.getElementById("descricao").value = buscandoTarefa.descricao;
   document.getElementById("prioridade").value = buscandoTarefa.prioridade;
   document.getElementById("status").value = buscandoTarefa.estado;
+
+  document.getElementById("btn-cancelar").style.display = "block";
+});
+
+// Habilita botão cancelar após clicar em editar
+const btnCancelar = document.getElementById("btn-cancelar");
+btnCancelar.addEventListener("click", () => {
+  tarefaEmEdicao = null;
+  form.reset();
+  btnCancelar.style.display = "none";
+});
+
+// Habilitando botão para simular sincronização
+document.getElementById("btn-sincronizar").addEventListener("click", () => {
+  document.getElementById("btn-sincronizar").textContent =
+    "🔄 Sincronizando...";
+  simularAPISimples();
+  atualizaPágina();
 });
 
 // Remover tarefa
