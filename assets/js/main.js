@@ -1,5 +1,6 @@
 let tarefas = [];
 let modoOnline = true;
+let tarefaEmEdicao = null;
 
 // Funções localStorage
 function salvarTarefas() {
@@ -11,8 +12,8 @@ function carregarTarefas() {
   if (!dados) return;
   tarefas = JSON.parse(dados);
 
-  atualizaContadores();
-  mostraTarefas();
+  atualizarContadores();
+  mostrarTarefas(tarefas);
 }
 
 // Capturando o formulário e interceptando o envio
@@ -44,18 +45,30 @@ function renderizarTarefas() {
     valid = false;
   }
 
-  const novaTarefa = {
-    id: Date.now(),
-    titulo: titulo,
-    descricao: descricao,
-    status: estado,
-    prioridade: prioridade,
-    criadoEm: new Date().toISOString(),
-    atualizadoEm: new Date().toISOString(),
-    sincronizado: false,
-  };
+  if (tarefaEmEdicao === null) {
+    const novaTarefa = {
+      id: Date.now(),
+      titulo: titulo,
+      descricao: descricao,
+      status: estado,
+      prioridade: prioridade,
+      criadoEm: new Date().toISOString(),
+      atualizadoEm: new Date().toISOString(),
+      sincronizado: false,
+    };
+    tarefas.push(novaTarefa);
+  } else {
+    const buscandoTarefas = tarefas.find((item) => item.id === tarefaEmEdicao);
 
-  tarefas.push(novaTarefa);
+    if (!buscandoTarefas) return;
+
+    buscandoTarefas.titulo = titulo;
+    buscandoTarefas.descricao = descricao;
+    buscandoTarefas.prioridade = prioridade;
+    buscandoTarefas.status = estado;
+
+    tarefaEmEdicao = null;
+  }
 
   salvarTarefas();
   mostrarTarefas(tarefas);
@@ -65,7 +78,7 @@ function renderizarTarefas() {
   return valid;
 }
 
-function mostraTarefas(listaTarefas) {
+function mostrarTarefas(listaTarefas) {
   const tarefas = document.getElementById("lista-tarefas");
 
   if (!listaTarefas) return;
@@ -93,11 +106,69 @@ function atualizarContadores() {
     `${totalTarefas} tarefa(s)`;
 }
 
-function atualizarStatusTarefas(id, novoStatus) {
-  const tarefa = tarefas.find((t) => t.id === id);
-  if (tarefa) {
-    tarefa.status = novoStatus;
-    salvarTarefas();
-    mostraTarefas(tarefas);
+// Filtros e listeners
+document.getElementById("btn-limpar-filtros").addEventListener("click", () => {
+  document.getElementById("filtro-status").value = "todas";
+  document.getElementById("filtro-prioridade").value = "todas";
+  mostrarTarefas(tarefas);
+});
+
+document.getElementById("filtro-status").addEventListener("change", () => {
+  const status = document.getElementById("filtro-status").value;
+  if (status === "todas") {
+    mostrarTarefas(tarefas);
+  } else {
+    const filtrados = tarefas.filter((tarefa) => tarefa.status === status);
+    mostrarTarefas(filtrados);
   }
-}
+});
+
+document.getElementById("filtro-prioridade").addEventListener("change", () => {
+  const prioridade = document.getElementById("filtro-prioridade").value;
+  if (prioridade === "todas") {
+    mostrarTarefas(tarefas);
+  } else {
+    const filtrados = tarefas.filter(
+      (tarefa) => tarefa.prioridade === prioridade,
+    );
+    mostrarTarefas(filtrados);
+  }
+});
+
+// Editar status da tarefa
+document.addEventListener("click", (event) => {
+  if (!event.target.classList.contains("btn-editar")) return;
+
+  const tarefasDiv = event.target.closest(".tarefa-item");
+  tarefaEmEdicao = Number(event.target.dataset.id);
+
+  const buscandoTarefa = tarefas.find(
+    (item) => Number(item.id) === tarefaEmEdicao,
+  );
+
+  document.getElementById("titulo").value = buscandoTarefa.titulo;
+  document.getElementById("descricao").value = buscandoTarefa.descricao;
+  document.getElementById("prioridade").value = buscandoTarefa.prioridade;
+  document.getElementById("status").value = buscandoTarefa.estado;
+});
+
+// Remover tarefa
+const listaTarefas = document.getElementById("lista-tarefas");
+listaTarefas.addEventListener("click", (event) => {
+  if (!event.target.classList.contains("btn-remover")) return;
+
+  const tarefa = event.target.closest(".tarefa-item");
+  if (!tarefa) return;
+
+  const id = Number(tarefa.dataset.id);
+  const confirmar = confirm("Tem certeza que deseja excluir esta tarefa?");
+  if (!confirmar) return;
+
+  tarefas = tarefas.filter((t) => t.id !== id);
+
+  mostrarTarefas(tarefas);
+  salvarTarefas();
+  atualizarContadores();
+});
+
+carregarTarefas();
