@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Tarefas</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sistema de Tarefas</h1>
+
+      <!-- Barra de status -->
+      <div class="status-bar">
+        <div>
+          <span id="status-conexao">✅ Online</span>
+          | <span id="contador-tarefas">0 tarefas</span> |
+          <span id="contador-pendentes">0 não sincronizadas</span>
+        </div>
+        <button id="btn-sincronizar" style="width: auto">🔄 Sincronizar</button>
+      </div>
+
+      <!-- Formulário -->
+      <div class="form-container">
+        <h2>Adicionar Nova Tarefa</h2>
+        <form id="form-tarefa">
+          <div class="form-group">
+            <label>Título:</label>
+            <input type="text" id="titulo" required maxlength="100" />
+            <div class="erro" id="erro-titulo"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Descrição:</label>
+            <textarea id="descricao" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Prioridade:</label>
+            <select id="prioridade">
+              <option value="baixa">Baixa</option>
+              <option value="media" selected>Média</option>
+              <option value="alta">Alta</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Estado:</label>
+            <select id="status">
+              <option value="pendente">Pendente</option>
+              <option value="Em andamento" selected>Em Andamento</option>
+              <option value="concluida">Concluidas</option>
+            </select>
+          </div>
+
+          <button type="submit">Salvar Tarefa</button>
+          <div class="erro" id="erro-geral"></div>
+        </form>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros">
+        <select id="filtro-status">
+          <option value="todas">Todas as tarefas</option>
+          <option value="pendente">Pendentes</option>
+          <option value="Em andamento">Em andamento</option>
+          <option value="concluida">Concluídas</option>
+        </select>
+
+        <select id="filtro-prioridade">
+          <option value="todas">Todas as prioridades</option>
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
+        </select>
+
+        <button id="btn-limpar-filtros" style="width: auto">
+          Limpar Filtros
+        </button>
+      </div>
+
+      <!-- Lista de tarefas -->
+      <div id="lista-tarefas">
+        <p style="text-align: center; color: #777">
+          Nenhuma tarefa cadastrada.
+        </p>
+      </div>
+    </div>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
