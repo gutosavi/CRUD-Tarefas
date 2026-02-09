@@ -8,7 +8,9 @@ function simularAPISimples() {
 
   return new Promise((resolve) => {
     setTimeout(() => {
-      alert("Servidor offline no momento - tarefa pendente de sincronização!");
+      msgErro(
+        "Servidor offline no momento - tarefa pendente de sincronização!",
+      );
       resolve({ success: true });
     }, 1000);
   });
@@ -45,16 +47,17 @@ function renderizarTarefas() {
   const estado = document.getElementById("status").value;
 
   if (!titulo || !descricao) {
-    alert("Preencha todos os campos");
-    valid = false;
+    msgErro("Preencha todos os campos");
+    return false;
   }
 
-  if (titulo.length <= 3) {
-    alert("Título precisa ter no mínimo 3 carecteres");
-    valid = false;
+  if (titulo.length <= 2) {
+    document.getElementById("erro-titulo").innerHTML =
+      "Título precisa ter no mínimo 3 carecteres";
+    return false;
   } else if (descricao.length > 500) {
-    alert("Descrição muito longa (max. 500 caracteres)");
-    valid = false;
+    msgErro("Descrição muito longa (max. 500 caracteres)");
+    return false;
   }
 
   if (tarefaEmEdicao === null) {
@@ -98,6 +101,11 @@ function renderizarTarefas() {
   return valid;
 }
 
+function msgErro(texto) {
+  const erro = document.getElementById("erro-geral");
+  erro.innerHTML = texto;
+}
+
 function mostrarTarefas(listaTarefas) {
   const tarefas = document.getElementById("lista-tarefas");
 
@@ -121,7 +129,7 @@ function mostrarTarefas(listaTarefas) {
 
 function atualizarContadores() {
   const totalTarefas = tarefas.length;
-  const tarefasNaoSincronizadas = tarefas.filter((t) => !t.sincronizado.length);
+  const tarefasNaoSincronizadas = tarefas.filter((t) => !t.sincronizado);
 
   document.getElementById("contador-tarefas").textContent =
     `${totalTarefas} tarefa(s)`;
@@ -179,7 +187,7 @@ document.addEventListener("click", (event) => {
   document.getElementById("titulo").value = buscandoTarefa.titulo;
   document.getElementById("descricao").value = buscandoTarefa.descricao;
   document.getElementById("prioridade").value = buscandoTarefa.prioridade;
-  document.getElementById("status").value = buscandoTarefa.estado;
+  document.getElementById("status").value = buscandoTarefa.status;
 
   document.getElementById("btn-cancelar").style.display = "block";
 });
