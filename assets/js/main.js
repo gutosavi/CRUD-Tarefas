@@ -135,7 +135,7 @@ document.getElementById("filtro-prioridade").addEventListener("change", () => {
   }
 });
 
-// Editar status da tarefa
+// Editar tarefa
 document.addEventListener("click", (event) => {
   if (!event.target.classList.contains("btn-editar")) return;
 
