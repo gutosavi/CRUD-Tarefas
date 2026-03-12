@@ -16,6 +16,63 @@ function simularAPISimples() {
   });
 }
 
+// Consumindo API real:
+async function sincronizarComApi(tarefa) {
+  try {
+    const resposta = await fetch("https://jsonplaceholder.typicode.com/todos", {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({
+        title: tarefa.titulo,
+        completed: tarefa.status === "concluida",
+      }),
+    });
+
+    if (!resposta.ok) throw new Error("Falha na requisição");
+
+    const dados = await resposta.json();
+    console.log("API respondeu com ID:", dados.id);
+
+    const encontrada = tarefas.find((t) => t.id === tarefa.id);
+    if (encontrada) {
+      encontrada.sincronizado = true;
+      salvarTarefas();
+      atualizarContadores();
+    }
+  } catch (erro) {
+    msgErro("Servidor offline - tarefa pendente de sincronização!");
+    console.log(erro);
+  }
+}
+
+// carregar da API
+async function carregarDaAPI() {
+  try {
+    const resposta = await fetch(
+      "https://jsonplaceholder.typicode.com/todos?_limit=5",
+    );
+    const dados = await resposta.json();
+
+    const tarefasDaAPI = dados.map((item) => ({
+      id: item.id,
+      titulo: item.title,
+      descricao: "Importada da API",
+      status: item.completed ? "concluida" : "pendente",
+      prioridade: "media",
+      criadoEm: new Date().toISOString(),
+      atualizadoEm: new Date().toISOString(),
+      sincronizado: true,
+    }));
+
+    tarefas = tarefasDaAPI;
+    mostrarTarefas(tarefas);
+    atualizarContadores();
+  } catch (erro) {
+    console.error("Erro ao carregar da API", erro);
+    carregarTarefas();
+  }
+}
+
 // Funções localStorage
 function salvarTarefas() {
   localStorage.setItem("tarefas-app", JSON.stringify(tarefas));
@@ -33,10 +90,12 @@ function carregarTarefas() {
 // Capturando o formulário e interceptando o envio
 const form = document.getElementById("form-tarefa");
 
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  if (!renderizarTarefas()) return;
-});
+function handleClick() {
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!renderizarTarefas()) return;
+  });
+}
 
 // Definindo as funções
 function renderizarTarefas() {
@@ -84,21 +143,26 @@ function renderizarTarefas() {
 
     tarefaEmEdicao = null;
   }
+  const tarefaAtual = tarefas[tarefas.length - 1];
 
   salvarTarefas();
   mostrarTarefas(tarefas);
   atualizarContadores();
+  sincronizarTarefas(tarefaAtual);
+  // sincronizarComApi(tarefaAtual);
   form.reset();
 
-  simularAPISimples()
-    .then(() => {
-      console.log("Tarefa em espera de sincronização!");
-    })
-    .catch(() => {
-      console.log("Falha na sincronização");
-    });
-
   return valid;
+}
+
+function sincronizarTarefas(tarefaAtual) {
+  const btnSincronizar = document.getElementById("btn-sincronizar");
+
+  btnSincronizar.addEventListener("click", () => {
+    btnSincronizar.textContent = "🔄 Sincronizando...";
+    sincronizarComApi(tarefaAtual);
+    atualizaPágina();
+  });
 }
 
 function msgErro(texto) {
@@ -177,7 +241,7 @@ document.getElementById("filtro-prioridade").addEventListener("change", () => {
 document.addEventListener("click", (event) => {
   if (!event.target.classList.contains("btn-editar")) return;
 
-  const tarefasDiv = event.target.closest(".tarefa-item");
+  // const tarefasDiv = event.target.closest(".tarefa-item");
   tarefaEmEdicao = Number(event.target.dataset.id);
 
   const buscandoTarefa = tarefas.find(
@@ -200,14 +264,6 @@ btnCancelar.addEventListener("click", () => {
   btnCancelar.style.display = "none";
 });
 
-// Habilitando botão para simular sincronização
-document.getElementById("btn-sincronizar").addEventListener("click", () => {
-  document.getElementById("btn-sincronizar").textContent =
-    "🔄 Sincronizando...";
-  simularAPISimples();
-  atualizaPágina();
-});
-
 // Remover tarefa
 const listaTarefas = document.getElementById("lista-tarefas");
 listaTarefas.addEventListener("click", (event) => {
@@ -227,4 +283,5 @@ listaTarefas.addEventListener("click", (event) => {
   atualizarContadores();
 });
 
-carregarTarefas();
+carregarDaAPI();
+handleClick();
